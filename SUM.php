@@ -1,6 +1,10 @@
 #!/usr/bin/env php
-
 <?php
+
+function microtime_float() {
+    list($usec, $sec) = explode(" ", microtime());
+    return ((float)$usec + (float)$sec);
+}
 
 function get_pdo() {
 
@@ -92,18 +96,18 @@ $pdo = get_pdo();
 $SQL = "SELECT COUNT(`id`) FROM (SELECT `user`.`id` FROM `user` JOIN `lab` ON `lab`.`owner_id` = `user`.`id` GROUP BY `user`.`id`) count_table";
 echo $SQL;
 echo "\n";
-$now = microtime();
+$now = microtime_float();
 $pdo->query($SQL);
 
-echo microtime() - $now;
+echo microtime_float() - $now;
 echo "\n";
 
 $SQL = "SELECT COUNT(DISTINCT `user`.`id`) FROM `user` JOIN `lab` ON (`lab`.`owner_id` = `user`. `id`)";
 echo $SQL;
 echo "\n";
-$now = microtime();
+$now = microtime_float();
 $pdo->query($SQL);
 
-echo microtime() - $now;
+echo microtime_float() - $now;
 
 echo "\n";
