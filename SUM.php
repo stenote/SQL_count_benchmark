@@ -1,3 +1,5 @@
+#!/usr/bin/env php
+
 <?php
 
 function get_pdo() {
@@ -25,9 +27,9 @@ function get_pdo() {
 //创建用户表
 function create_user_table() {
     $SQL = "
-    CREATE TALBE IF NOT EXISTS `user` (
-        id INT PRIMARY KEY,
-        name VARCHAR(50) NOT NULL DEFULAT ''
+    CREATE TABLE IF NOT EXISTS `user` (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        name VARCHAR(50) NOT NULL DEFAULT ''
     )
     ";
 
@@ -41,11 +43,12 @@ function create_user($name) {
     $pdo->query($SQL);
 }
 
-function create_eq_table() {
+function create_lab_table() {
     $SQL = "
-    CREATE TALBE IF NOT EXISTS `eq` (
-        id INT PRIMARY KEY,
-        name VARCHAR(50) NOT NULL DEFULAT ''
+    CREATE TABLE IF NOT EXISTS `lab` (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        owner_id INT DEFAULT 0,
+        name VARCHAR(50) NOT NULL DEFAULT ''
     )
     ";
 
@@ -53,26 +56,14 @@ function create_eq_table() {
     $pdo->query($SQL);
 }
 
-function create_eq($name) {
-    $SQL = "INSERT INTO `eq` (`name`) VALUES ($name)";
+function create_lab($name) {
+    $SQL = "INSERT INTO `lab` (`name`) VALUES ($name)";
     $pdo = get_pdo();
     $pdo->query($SQL);
 }
 
-function create_relation_table() {
-    $SQL = "
-    CREATE TALBE IF NOT EXISTS `_r_user_eq` (
-        uid INT,
-        eid INT
-    )
-    ";
-
-    $pdo = get_pdo();
-    $pdo->query($SQL);
-}
-
-function connect_user_equipment($uid, $eqid) {
-    $SQL = "INSERT INTO `_r_user_eq` (`uid`, `eid`) VALUES ($uid, $eid)";
+function set_lab_owner($lab_id, $owner_id) {
+    $SQL = "UPDATE `lab` SET `owner_id` = $owner_id WHERE `id` = $lab_id";
 
     $pdo = get_pdo();
     $pdo->query($SQL);
@@ -80,24 +71,39 @@ function connect_user_equipment($uid, $eqid) {
 
 create_user_table();
 
-for($i = 0; $i < 10000; $i ++) {
+for($i = 1; $i <= 100000; $i ++) {
     create_user($i);
-    echo '.';
 }
 
-create_eq_table();
+create_lab_table();
 
-for($i = 0; $i < 10000; $i ++) {
-    create_eq($i);
-    echo '.';
+for($i = 1; $i <= 100000; $i ++) {
+    create_lab($i);
 }
 
-create_relation_table();
-
-//创建关联关系
-//10000个仪器随机关联3个user
-for($i = 0; $i < 10000; $i ++) {
-    connect_user_equipment(rand(1, 10000), $i);
-    connect_user_equipment(rand(1, 10000), $i);
-    connect_user_equipment(rand(1, 10000), $i);
+//100000个lab随机设定owner
+for($i = 0; $i <= 100000; $i ++) {
+    set_lab_owner($i, rand(1, 100000));
 }
+
+$pdo = get_pdo();
+
+
+$SQL = "SELECT COUNT(`id`) FROM (SELECT `user`.`id` FROM `user` JOIN `lab` ON `lab`.`owner_id` = `user`.`id` GROUP BY `user`.`id`) count_table";
+echo $SQL;
+echo "\n";
+$now = microtime();
+$pdo->query($SQL);
+
+echo microtime() - $now;
+echo "\n";
+
+$SQL = "SELECT COUNT(DISTINCT `user`.`id`) FROM `user` JOIN `lab` ON (`lab`.`owner_id` = `user`. `id`)";
+echo $SQL;
+echo "\n";
+$now = microtime();
+$pdo->query($SQL);
+
+echo microtime() - $now;
+
+echo "\n";
