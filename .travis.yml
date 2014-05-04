@@ -3,5 +3,4 @@ php:
 - "5.3"
 - "5.4"
 - "5.5"
-script: php SUM.php
-notifications: rui.ma@geneegroup.com
+script: php count.php

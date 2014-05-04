@@ -75,25 +75,25 @@ function set_lab_owner($lab_id, $owner_id) {
 
 create_user_table();
 
-for($i = 1; $i <= 100000; $i ++) {
+for($i = 1; $i <= 1000000; $i ++) {
     create_user($i);
 }
 
 create_lab_table();
 
-for($i = 1; $i <= 100000; $i ++) {
+for($i = 1; $i <= 1000000; $i ++) {
     create_lab($i);
 }
 
 //100000个lab随机设定owner
-for($i = 0; $i <= 100000; $i ++) {
-    set_lab_owner($i, rand(1, 100000));
+for($i = 0; $i <= 1000000; $i ++) {
+    set_lab_owner($i, rand(1, 1000000));
 }
 
 $pdo = get_pdo();
 
 
-$SQL = "SELECT COUNT(`id`) FROM (SELECT `user`.`id` FROM `user` JOIN `lab` ON `lab`.`owner_id` = `user`.`id` GROUP BY `user`.`id`) count_table";
+$SQL = "SELECT COUNT(`id`) FROM (SELECT `user`.`id`, `user`.`name` FROM `user` JOIN `lab` ON `lab`.`owner_id` = `user`.`id` GROUP BY `user`.`id`) count_table";
 echo $SQL;
 echo "\n";
 $now = microtime_float();
